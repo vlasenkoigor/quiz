@@ -64,7 +64,7 @@ function App() {
 
             if (timeRef.current === 0) {
                 clearInterval(timerUUIDRef.current)
-                // setIsFinished(true)
+                setIsFinished(true)
             }
 
             setTime(timeRef.current)
