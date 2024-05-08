@@ -29,7 +29,7 @@ function App() {
 
     const [time, setTime] = useState(30);
 
-    const timerUUIDRef = useRef<NodeJS.Timeout>();
+    const timerUUIDRef = useRef(0);
 
     const timeRef = useRef(time);
 
@@ -60,7 +60,7 @@ function App() {
     function startGame() {
         setIsStarted(true);
 
-        timerUUIDRef.current = setInterval(() => {
+        timerUUIDRef.current = window.setInterval(() => {
             timeRef.current = timeRef.current - 1;
 
             if (timeRef.current === 0) {
