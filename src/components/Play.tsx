@@ -3,11 +3,10 @@ import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-import TextField from '@mui/material/TextField';
 import type {TPlayer} from "../App.tsx";
 import ButtonGroup from '@mui/material/ButtonGroup';
 
-import {useEffect, useState} from 'react'
+import {useState} from 'react'
 
 type TRound = {
     player: TPlayer,
@@ -21,7 +20,7 @@ type TRound = {
 
 export const Play: React.FC<TRound> = (props) => {
 
-    const clamp = (num: number, min: number, max: number) => Math.min(Math.max(num, min), max);
+    // const clamp = (num: number, min: number, max: number) => Math.min(Math.max(num, min), max);
 
     const shuffle = (array: number[]) => {
         return array.sort(() => Math.random() - 0.5);
@@ -29,7 +28,7 @@ export const Play: React.FC<TRound> = (props) => {
 
     const [answer, setAnswer] = useState(0);
 
-    const [allOptions, setAllOptions] = useState<number[]>(shuffle([props.player.jerseyNumber, ...props.player.wrongJerseyNumbers]))
+    const [allOptions, ] = useState<number[]>(shuffle([props.player.jerseyNumber, ...props.player.wrongJerseyNumbers]))
 
     return (
         <div>
