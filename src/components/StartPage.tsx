@@ -5,7 +5,7 @@ import React from 'react';
 export const StartPage: React.FC<{ startGame: () => void }> = ({startGame}) => {
     return (
         <div>
-            <Button onClick={startGame}>Start Game</Button>
+            <Button onClick={startGame} variant={'outlined'}>Start Game</Button>
         </div>
     );
 }

@@ -6,16 +6,15 @@ import {Play} from "./components/Play.tsx";
 import {Summary} from "./components/Summary.tsx";
 
 export type TPlayer =
-    { name: string, club: string, jerseyNumber: number, image: string }
+    { name: string, club: string, jerseyNumber: number, wrongJerseyNumbers:number[], image: string }
 
 
 const players: TPlayer[] = [
-    {name: 'Kevin De Bruyne', club: 'Manchester City', jerseyNumber: 17, image: 'debruyne.jpg'},
-    {name: 'Mohamed Salah', club: 'Liverpool', jerseyNumber: 11, image: 'salah.jpg'},
-    {name: 'Harry Kane', club: 'Bayern Munich', jerseyNumber: 10, image: 'kane.jpg'},
-    {name: 'Kylian Mbappe', club: 'Paris Saint-Germain', jerseyNumber: 7, image: 'mbape.jpg'},
-    {name: 'Erling Haaland', club: 'Manchester City', jerseyNumber: 9, image: 'haaland.jpg'},
-
+    {name: 'Kevin De Bruyne', club: 'Manchester City', image: 'debruyne.jpg', jerseyNumber: 17, wrongJerseyNumbers: [7, 10, 11, 9]},
+    {name: 'Mohamed Salah', club: 'Liverpool', jerseyNumber: 11, image: 'salah.jpg', wrongJerseyNumbers: [7, 10, 9, 8]},
+    {name: 'Harry Kane', club: 'Bayern Munich', jerseyNumber: 10, image: 'kane.jpg', wrongJerseyNumbers: [7, 9, 11, 8]},
+    {name: 'Kylian Mbappe', club: 'Paris Saint-Germain', jerseyNumber: 7, image: 'mbape.jpg', wrongJerseyNumbers: [9, 10, 11, 8]},
+    {name: 'Erling Haaland', club: 'Manchester City', jerseyNumber: 9, image: 'haaland.jpg', wrongJerseyNumbers: [30, 10, 11, 8]},
 ]
 
 function App() {
@@ -65,14 +64,13 @@ function App() {
 
             if (timeRef.current === 0) {
                 clearInterval(timerUUIDRef.current)
-                setIsFinished(true)
+                // setIsFinished(true)
             }
 
             setTime(timeRef.current)
 
             console.log('time', timeRef.current);
         }, 1000);
-
     }
 
     return (
