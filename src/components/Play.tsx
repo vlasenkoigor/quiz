@@ -33,7 +33,7 @@ export const Play: React.FC<TRound> = (props) => {
                     component="img"
                     alt="green iguana"
                     height="180"
-                    image={`/public/${props.player.image}`}
+                    image={`/${props.player.image}`}
                 />
                 <CardContent>
                     <Typography gutterBottom variant="h5" component="div">
