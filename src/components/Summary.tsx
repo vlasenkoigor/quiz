@@ -1,8 +1,11 @@
 import Button from '@mui/material/Button';
 import React from 'react';
+import {useAppContext} from "@/app/AppContext.tsx";
 
 
-export const Summary: React.FC<{ score: number }> = ({score}) => {
+export const Summary: React.FC = () => {
+    const {state:{score}} = useAppContext();
+
     return (
         <div>
             <h1>Game Over!</h1>
