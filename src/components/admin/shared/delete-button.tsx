@@ -1,22 +1,22 @@
-import Button, {ButtonProps} from "@mui/material/Button";
+import Button, { ButtonProps } from '@mui/material/Button';
 import DeleteIcon from '@mui/icons-material/Delete';
-import {FC} from "react";
+import { FC } from 'react';
 
 // admin delete button
 interface DeleteButtonProps {
-    buttonProps?: ButtonProps;
+  buttonProps?: ButtonProps;
 
-    action: () => void;
+  action: () => void;
 
-    text? : string;
+  text?: string;
 }
 
-const DeleteButton: FC<DeleteButtonProps> = ({action, text, buttonProps}) => {
-    return (
-        <Button variant="contained" color='error' startIcon={<DeleteIcon/>} onClick={action} {...buttonProps}  >
-            {text ? text : 'Delete'}
-        </Button>
-    );
+const DeleteButton: FC<DeleteButtonProps> = ({ action, text, buttonProps }) => {
+  return (
+    <Button variant="contained" color="error" startIcon={<DeleteIcon />} onClick={action} {...buttonProps}>
+      {text ? text : 'Delete'}
+    </Button>
+  );
 };
 
 export default DeleteButton;

@@ -1,78 +1,86 @@
-import {auth,} from "../firebase-app.ts";
+import { auth } from '../firebase-app';
 import {
-    signInWithEmailAndPassword,
-    createUserWithEmailAndPassword,
-    signOut as firebaseSignOut,
-    GoogleAuthProvider,
-    FacebookAuthProvider,
-    signInWithPopup,
-} from "firebase/auth";
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut as firebaseSignOut,
+  GoogleAuthProvider,
+  FacebookAuthProvider,
+  signInWithPopup,
+} from 'firebase/auth';
 
-import {FirebaseError} from "firebase/app";
+import { FirebaseError } from 'firebase/app';
 
-import {useState} from "react";
-import {mapError} from "../../lib/firebase-error-mapping.ts";
+import { useState } from 'react';
+import { mapError } from '../../lib/firebase-error-mapping';
 
 export const useAuth = () => {
-    const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-    const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-    return {
-        error,
+  return {
+    error,
 
-        loading,
+    loading,
 
-        signIn: (email: string, password: string) => signIn(email, password, setError, setLoading),
+    signIn: (email: string, password: string) => signIn(email, password, setError, setLoading),
 
-        signUp: (email: string, password: string) => signUp(email, password, setError, setLoading),
+    signUp: (email: string, password: string) => signUp(email, password, setError, setLoading),
 
-        signInWithProvider: (providerType: 'facebook' | 'google') => signInWithProvider(providerType, setError),
+    signInWithProvider: (providerType: 'facebook' | 'google') => signInWithProvider(providerType, setError),
 
-        forgotPassword: () => false,
+    forgotPassword: () => false,
 
-        signOut: () => signOut()
-    }
-}
+    signOut: () => signOut(),
+  };
+};
 
+const signIn = async (
+  email: string,
+  password: string,
+  setError: (message: string | null) => void,
+  setLoading: (loading: boolean) => void,
+) => {
+  setError(null);
+  setLoading(true);
 
-const signIn = async (email: string, password: string, setError: (message: string | null) => void, setLoading: (loading: boolean) => void) => {
-    setError(null);
-    setLoading(true)
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+  } catch (e) {
+    setError(mapError(e));
+  }
 
-    try {
-        await signInWithEmailAndPassword(auth, email, password);
-    } catch (e) {
-        setError(mapError(e))
-    }
+  setLoading(false);
+};
 
-    setLoading(false);
-}
+const signUp = async (
+  email: string,
+  password: string,
+  setError: (message: string | null) => void,
+  setLoading: (loading: boolean) => void,
+) => {
+  setError(null);
+  setLoading(true);
 
-const signUp = async (email: string, password: string, setError: (message: string | null) => void, setLoading: (loading: boolean) => void) => {
-    setError(null);
-    setLoading(true)
+  try {
+    await createUserWithEmailAndPassword(auth, email, password);
+  } catch (e) {
+    setError(mapError(e));
+  }
 
-    try {
-        await createUserWithEmailAndPassword(auth, email, password);
-    } catch (e) {
-        setError(mapError(e))
-    }
-
-    setLoading(false);
-}
+  setLoading(false);
+};
 
 const signInWithProvider = async (providerType: 'facebook' | 'google', setError: (string) => void) => {
-    const provider = providerType === 'google' ? new GoogleAuthProvider() : new FacebookAuthProvider();
+  const provider = providerType === 'google' ? new GoogleAuthProvider() : new FacebookAuthProvider();
 
-    provider.setCustomParameters({
-        'prompt': 'select_account'
-    })
+  provider.setCustomParameters({
+    prompt: 'select_account',
+  });
 
-    signInWithPopup(auth, provider)
-}
+  signInWithPopup(auth, provider);
+};
 
 const signOut = async () => {
-    return firebaseSignOut(auth);
-}
-
+  return firebaseSignOut(auth);
+};

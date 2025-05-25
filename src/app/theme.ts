@@ -1,81 +1,82 @@
-import { PaletteColorOptions, createTheme, responsiveFontSizes  } from "@mui/material";
-import {common} from "@mui/material/colors";
+import { PaletteColorOptions } from '@mui/material/styles/createPalette';
+import createTheme from '@mui/material/styles/createTheme';
+import responsiveFontSizes from '@mui/material/styles/responsiveFontSizes';
 
-declare module "@mui/material/styles" {
-    interface PaletteOptions {
-        white: PaletteColorOptions;
-        someMore: PaletteColorOptions;
-    }
+import { common } from '@mui/material/colors';
+
+declare module '@mui/material/styles' {
+  interface PaletteOptions {
+    white: PaletteColorOptions;
+    someMore: PaletteColorOptions;
+  }
 }
 
-declare module "@mui/material/Button" { // <-- Added `/Button` here
-    interface ButtonPropsColorOverrides {
-        white: true;
-        someMore: true;
-    }
+declare module '@mui/material/Button' {
+  // <-- Added `/Button` here
+  interface ButtonPropsColorOverrides {
+    white: true;
+    someMore: true;
+  }
 }
-    export const theme = responsiveFontSizes(createTheme({
+export const theme = responsiveFontSizes(
+  createTheme({
     typography: {
-        fontFamily: [
-            '-apple-system',
-            'BlinkMacSystemFont',
-            '"Segoe UI"',
-            'Roboto',
-            '"Helvetica Neue"',
-            'Arial',
-            'sans-serif',
-            '"Apple Color Emoji"',
-            '"Segoe UI Emoji"',
-            '"Segoe UI Symbol"',
-        ].join(','),
+      fontFamily: [
+        '-apple-system',
+        'BlinkMacSystemFont',
+        '"Segoe UI"',
+        'Roboto',
+        '"Helvetica Neue"',
+        'Arial',
+        'sans-serif',
+        '"Apple Color Emoji"',
+        '"Segoe UI Emoji"',
+        '"Segoe UI Symbol"',
+      ].join(','),
     },
 
     components: {
-        MuiTextField: {
-            styleOverrides : {
-                root : {
-                    backgroundColor : common.white,
-                    borderRadius : '4px'
-
-                },
-            }
+      MuiTextField: {
+        styleOverrides: {
+          root: {
+            backgroundColor: common.white,
+            borderRadius: '4px',
+          },
         },
+      },
 
-
-        MuiButton: {
-            defaultProps: {
-                disableTouchRipple: true,
-            },
-            styleOverrides:{
-                root : {
-                    whiteSpace: 'nowrap',
-                    // overflow: 'hidden',
-                }
-            }
-        }
+      MuiButton: {
+        defaultProps: {
+          disableTouchRipple: true,
+        },
+        styleOverrides: {
+          root: {
+            whiteSpace: 'nowrap',
+            // overflow: 'hidden',
+          },
+        },
+      },
     },
     palette: {
-        primary: {
-            main: '#8d4314',
-        },
+      primary: {
+        main: '#8d4314',
+      },
 
-        background: {
+      background: {
+        paper: '#f5f5f5',
+        // default: '#83ff03',s
+      },
+      secondary: {
+        main: '#ffd009',
+      },
 
-            paper : '#f5f5f5'
-            // default: '#83ff03',s
-        },
-        secondary: {
-            main: '#ffd009',
-        },
+      white: {
+        main: '#ffffff',
+      },
 
-
-        white: {
-            main: '#ffffff'
-        },
-
-        someMore: {
-            main: 'rgb(59,57,57)',
-
-        }
+      someMore: {
+        main: 'rgb(59,57,57)',
+      },
     },
-}));
+  }),
+);

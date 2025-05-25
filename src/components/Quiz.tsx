@@ -1,292 +1,294 @@
-import {useParams} from 'react-router-dom';
-import Box from "@mui/material/Box";
-import * as React from "react";
-import {TQuestion, useQuiz} from "../services/use-quiz.ts";
-import {
-    Card, CardHeader,
-    Checkbox,
-    Dialog, DialogActions,
-    DialogContent,
-    DialogTitle,
-    FormControl,
-    Grid,
-    Input,
-    Stack
-} from "@mui/material";
-import CardContent from "@mui/material/CardContent";
-import Typography from "@mui/material/Typography";
-import IconButton from "@mui/material/IconButton";
-import AddBoxSharpIcon from "@mui/icons-material/AddBoxSharp";
-import Button from "@mui/material/Button";
+import { useParams } from 'react-router';
+import Box from '@mui/material/Box';
+import * as React from 'react';
+import { TQuestion, useQuiz } from '@/services/use-quiz';
+import Card from '@mui/material/Card/Card';
+import CardHeader from '@mui/material/CardHeader/CardHeader';
+import Checkbox from '@mui/material/Checkbox/Checkbox';
+import Dialog from '@mui/material/Dialog/Dialog';
+import DialogTitle from '@mui/material/DialogTitle/DialogTitle';
+import DialogContent from '@mui/material/DialogContent/DialogContent';
+import DialogActions from '@mui/material/DialogActions/DialogActions';
+import FormControl from '@mui/material/FormControl/FormControl';
+import Grid from '@mui/material/Grid/Grid';
+import Input from '@mui/material/Input/Input';
+import Stack from '@mui/material/Stack/Stack';
+import CardContent from '@mui/material/CardContent';
+import Typography from '@mui/material/Typography';
+import IconButton from '@mui/material/IconButton';
+import AddBoxSharpIcon from '@mui/icons-material/AddBoxSharp';
+import Button from '@mui/material/Button';
 
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import CloseIcon from '@mui/icons-material/Close';
 import CheckIcon from '@mui/icons-material/Check';
-import {useState} from "react";
-import ConfirmDialog from "./ConfirmDialog.tsx";
-import {useDialog} from "../hooks/use-dialog.ts";
-
+import { useState } from 'react';
+import ConfirmDialog from '@/components/confirm-dialog';
+import { useDialog } from '@/hooks/use-dialog';
 
 export function Quiz() {
-    const {id: moduleID, quizId} = useParams();
+  const { id: moduleID, quizId } = useParams();
 
-    if (!moduleID || !quizId) {
-        return <div>Invalid URL</div>
-    }
+  if (!moduleID || !quizId) {
+    return <div>Invalid URL</div>;
+  }
 
-    const {quiz, updateQuiz, isUpdating, error} = useQuiz(moduleID, quizId);
+  const { quiz, updateQuiz, isUpdating, error } = useQuiz(moduleID, quizId);
 
-    const {showDialog, dialogProps} = useDialog()
+  const { showDialog, dialogProps } = useDialog();
 
-    const [showEditQuestion, setShowEditQuestion] = useState(false);
+  const [showEditQuestion, setShowEditQuestion] = useState(false);
 
-    const [editingMode, setEditingMode] = useState<'edit' | 'add'>('add');
+  const [editingMode, setEditingMode] = useState<'edit' | 'add'>('add');
 
-    const [activeQuestion, setActiveQuestion] = useState<TQuestion>({text: '', answers: []});
+  const [activeQuestion, setActiveQuestion] = useState<TQuestion>({ text: '', answers: [] });
 
-    const [activeQuestionIndex, setActiveQuestionIndex] = useState<number>(-1);
+  const [activeQuestionIndex, setActiveQuestionIndex] = useState<number>(-1);
 
-    if (error) {
-        return <div>{error}</div>
-    }
+  if (error) {
+    return <div>{error}</div>;
+  }
 
-    if (!quiz) {
-        return <div>Loading...</div>
-    }
+  if (!quiz) {
+    return <div>Loading...</div>;
+  }
 
+  return (
+    <>
+      <Typography variant="subtitle1" color="text.primary" component="div">
+        Questions
+      </Typography>
 
-    return (
-        <>
-            <Typography variant="subtitle1" color="text.primary" component="div">
-                Questions
-            </Typography>
+      <Button
+        variant="text"
+        startIcon={<AddBoxSharpIcon />}
+        onClick={() => {
+          setEditingMode('add');
+          setActiveQuestionIndex(-1);
+          setActiveQuestion({ text: '', answers: [] });
+          setShowEditQuestion(true);
+        }}
+      >
+        Add question
+      </Button>
 
+      {quiz.questions?.map((question, index) => (
+        <QuestionCard
+          key={index}
+          data={question}
+          onEditClick={() => {
+            setActiveQuestion(question);
+            setEditingMode('edit');
+            setActiveQuestionIndex(index);
+            setShowEditQuestion(true);
+          }}
+          onDeleteClick={async () => {
+            const settleStatus = await showDialog();
+            if (settleStatus === 'cancelled') return;
 
-            <Button variant="text" startIcon={<AddBoxSharpIcon/>} onClick={() => {
-                setEditingMode('add');
-                setActiveQuestionIndex(-1);
-                setActiveQuestion({text: '', answers: []});
-                setShowEditQuestion(true)
-            }}>
-                Add question
-            </Button>
+            const questions = [...(quiz.questions || [])];
 
+            questions.splice(index, 1);
+            await updateQuiz({ questions });
+          }}
+        />
+      ))}
 
-            {quiz.questions?.map((question, index) => (
-                    <QuestionCard key={index} data={question}
-                                  onEditClick={() => {
-                                      setActiveQuestion(question);
-                                      setEditingMode('edit');
-                                      setActiveQuestionIndex(index);
-                                      setShowEditQuestion(true);
-                                  }}
+      {showEditQuestion && (
+        <EditQuestionCard
+          data={activeQuestion}
+          onClose={() => setShowEditQuestion(false)}
+          updateQuestion={async (data) => {
+            if (editingMode === 'edit') {
+              const questions = [...(quiz.questions || [])];
 
-                                  onDeleteClick={async () => {
-                                      const settleStatus = await showDialog();
-                                      if (settleStatus === 'cancelled') return;
+              questions[activeQuestionIndex] = data;
 
-                                      const questions = [...(quiz.questions || [])];
+              await updateQuiz({ questions });
+            } else {
+              await updateQuiz({ questions: [...(quiz.questions || []), data] });
+            }
+          }}
+        />
+      )}
 
-                                      questions.splice(index, 1);
-                                      await updateQuiz({questions});
-                                  }}
-                    />
-                )
-            )}
-
-            {showEditQuestion &&
-                <EditQuestionCard data={activeQuestion}
-                                  onClose={() => setShowEditQuestion(false)}
-                                  updateQuestion={async (data) => {
-                                      if (editingMode === 'edit') {
-                                          const questions = [...quiz.questions || []];
-
-                                          questions[activeQuestionIndex] = data;
-
-                                          await updateQuiz({questions});
-                                      } else {
-                                          await updateQuiz({questions: [...(quiz.questions || []), data]});
-                                      }
-                                  }}/>}
-
-
-            <ConfirmDialog confirmText={'Delete'} cancelText={'Cancel'} title={'Delete question?'}
-                           content={'Do you want to delete question? '} {...dialogProps}  />
-        </>
-    )
+      <ConfirmDialog
+        confirmText={'Delete'}
+        cancelText={'Cancel'}
+        title={'Delete question?'}
+        content={'Do you want to delete question? '}
+        {...dialogProps}
+      />
+    </>
+  );
 }
 
 type TQuestionCardProps = {
-    data: TQuestion;
-    onEditClick: () => void;
-    onDeleteClick: () => void;
-}
-const QuestionCard: React.FC<TQuestionCardProps> = ({data, onEditClick, onDeleteClick}) => {
-    return (
-        <Card sx={{display: 'flex', flexDirection: 'column', mb: '20px'}}>
-            <Box sx={{display: 'flex', flexDirection: 'column', width: '100%'}}>
-                <CardHeader
-                    action={
-                        <Box>
-                            <IconButton onClick={onDeleteClick}>
-                                <DeleteIcon color='warning'/>
-                            </IconButton>
-                            <IconButton onClick={onEditClick}>
-                                <EditIcon color='info'/>
-                            </IconButton>
-                        </Box>
-
-                    }
-
-                    title={<Typography variant='subtitle1'>{data.text}</Typography>}
-                />
-                <CardContent sx={{flex: '1 0 auto'}}>
-                    <Grid container spacing={2}>
-                        {data?.answers.map((answer, index) => (
-                            <Grid key={index} item xs={6}>
-                                <Box sx={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
-
-                                    {answer.correct ? <CheckIcon color='success'/> : <CloseIcon color='error'/>}
-
-                                    <Typography variant="body1" color="text.primary" component="div">
-                                        {answer.text}
-                                    </Typography>
-
-                                </Box>
-                            </Grid>))}
-                    </Grid>
-                </CardContent>
+  data: TQuestion;
+  onEditClick: () => void;
+  onDeleteClick: () => void;
+};
+const QuestionCard: React.FC<TQuestionCardProps> = ({ data, onEditClick, onDeleteClick }) => {
+  return (
+    <Card sx={{ display: 'flex', flexDirection: 'column', mb: '20px' }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+        <CardHeader
+          action={
+            <Box>
+              <IconButton onClick={onDeleteClick}>
+                <DeleteIcon color="warning" />
+              </IconButton>
+              <IconButton onClick={onEditClick}>
+                <EditIcon color="info" />
+              </IconButton>
             </Box>
+          }
+          title={<Typography variant="subtitle1">{data.text}</Typography>}
+        />
+        <CardContent sx={{ flex: '1 0 auto' }}>
+          <Grid container spacing={2}>
+            {data?.answers.map((answer, index) => (
+              <Grid key={index} item xs={6}>
+                <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                  {answer.correct ? <CheckIcon color="success" /> : <CloseIcon color="error" />}
 
-        </Card>
-    )
-}
-
+                  <Typography variant="body1" color="text.primary" component="div">
+                    {answer.text}
+                  </Typography>
+                </Box>
+              </Grid>
+            ))}
+          </Grid>
+        </CardContent>
+      </Box>
+    </Card>
+  );
+};
 
 const Answer: React.FC<{
-    data: { text: string, correct: boolean },
-    onChange: (data: { text: string, correct: boolean }) => void
-    deleteAnswer: () => void
-}> = ({data, onChange, deleteAnswer}) => {
+  data: { text: string; correct: boolean };
+  onChange: (data: { text: string; correct: boolean }) => void;
+  deleteAnswer: () => void;
+}> = ({ data, onChange, deleteAnswer }) => {
+  const { text, correct } = data;
 
-    const {text, correct} = data;
+  console.log('render EditQuestionCard.Answer');
+  return (
+    <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+      <Checkbox
+        checked={correct}
+        icon={<CloseIcon color="error" />}
+        checkedIcon={<CheckIcon color="success" />}
+        onChange={(e) => onChange({ ...data, ...{ correct: e.target.checked } })}
+      />
+      <Input fullWidth value={text} onChange={(e) => onChange({ ...data, ...{ text: e.target.value } })} />
 
-
-    console.log('render EditQuestionCard.Answer')
-    return (
-        <Box sx={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
-            <Checkbox checked={correct}
-                      icon={<CloseIcon color='error'/>}
-                      checkedIcon={<CheckIcon color='success'/>}
-                      onChange={(e) => onChange({...data, ...{correct: e.target.checked}})}
-            />
-            <Input fullWidth value={text} onChange={(e) => onChange({...data, ...{text: e.target.value}})}/>
-
-            <IconButton onClick={deleteAnswer}>
-                <DeleteIcon color='info'/>
-            </IconButton>
-        </Box>
-    )
-}
-
+      <IconButton onClick={deleteAnswer}>
+        <DeleteIcon color="info" />
+      </IconButton>
+    </Box>
+  );
+};
 
 type TQuestionProps = {
-    data: TQuestion;
-    updateQuestion: (question: TQuestion) => Promise<void>;
-    onClose: () => void;
-}
+  data: TQuestion;
+  updateQuestion: (question: TQuestion) => Promise<void>;
+  onClose: () => void;
+};
 
+const EditQuestionCard: React.FC<TQuestionProps> = ({ data, updateQuestion, onClose }) => {
+  const [answers, setAnswers] = useState(data.answers);
 
-const EditQuestionCard: React.FC<TQuestionProps> = ({data, updateQuestion, onClose}) => {
-    const [answers, setAnswers] = useState(data.answers);
+  const [text, setText] = useState(data.text);
 
-    const [text, setText] = useState(data.text);
+  function addAnswer() {
+    setAnswers([...answers, { text: '', correct: false }]);
+  }
 
-    function addAnswer() {
-        setAnswers([...answers, {text: '', correct: false}]);
-    }
+  const { showDialog, dialogProps } = useDialog();
 
-    const {showDialog, dialogProps} = useDialog();
+  async function onDeleteClicked(index: number) {
+    const settle = await showDialog();
 
-    async function onDeleteClicked(index: number) {
-        const settle = await showDialog();
+    if (settle === 'cancelled') return;
 
-        if (settle === 'cancelled') return;
+    answers.splice(index, 1);
 
-        answers.splice(index, 1);
+    setAnswers([...answers]);
+  }
 
-        setAnswers([...answers]);
-    }
+  async function save() {
+    await updateQuestion({ text, answers });
+    onClose();
+  }
 
-    async function save() {
-        await updateQuestion({text, answers});
-        onClose()
-    }
+  function cancel() {
+    onClose();
+  }
 
-    function cancel() {
-        onClose();
-    }
+  return (
+    <>
+      <Dialog
+        open={true}
+        keepMounted
+        fullWidth={true}
+        maxWidth="md"
+        // onClose={handleClose}
+        aria-describedby="alert-dialog-slide-description"
+      >
+        <Card sx={{ display: 'flex', flexDirection: 'column' }}>
+          <DialogTitle>Add question</DialogTitle>
+          <DialogContent>
+            <CardContent sx={{ flex: '1 0 auto' }}>
+              <FormControl fullWidth sx={{ m: 1 }} variant="standard">
+                <Input value={text} onChange={(event) => setText(event.target.value)} />
+              </FormControl>
 
-    return (
-        <>
-            <Dialog
-                open={true}
-                keepMounted
-                fullWidth={true}
-                maxWidth='md'
-                // onClose={handleClose}
-                aria-describedby="alert-dialog-slide-description"
-            >
-                <Card sx={{display: 'flex', flexDirection: 'column'}}>
+              <Typography variant="h6">Answers:</Typography>
 
-                    <DialogTitle>Add question</DialogTitle>
-                    <DialogContent>
-                        <CardContent sx={{flex: '1 0 auto'}}>
+              <Grid container spacing={2}>
+                {answers.map((answer, index) => (
+                  <Grid key={index} item xs={6}>
+                    <Answer
+                      data={answer}
+                      onChange={(data) => {
+                        answers[index] = data;
+                        setAnswers([...answers]);
+                      }}
+                      deleteAnswer={onDeleteClicked.bind(null, index)}
+                    />
+                  </Grid>
+                ))}
 
-                            <FormControl fullWidth sx={{m: 1}} variant="standard">
-                                <Input value={text} onChange={(event) => setText(event.target.value)}/>
-                            </FormControl>
+                <Grid item xs={6}>
+                  <IconButton onClick={addAnswer}>
+                    <AddBoxSharpIcon color="info" />
+                  </IconButton>
+                </Grid>
+              </Grid>
+            </CardContent>
+          </DialogContent>
+          <DialogActions sx={{ justifyContent: 'center' }}>
+            <Stack direction="row" spacing={2}>
+              <Button onClick={cancel} variant="contained" color="error">
+                Cancel
+              </Button>
+              <Button onClick={save} variant="contained" color="success">
+                Save
+              </Button>
+            </Stack>
+          </DialogActions>
+        </Card>
+      </Dialog>
 
-                            <Typography variant='h6'>Answers:</Typography>
-
-                            <Grid container spacing={2}>
-
-                                {answers.map((answer, index) => (
-                                    <Grid key={index} item xs={6}>
-                                        <Answer data={answer} onChange={
-                                            (data) => {
-                                                answers[index] = data;
-                                                setAnswers([...answers]);
-                                            }
-                                        }
-                                                deleteAnswer={onDeleteClicked.bind(null, index)}
-                                        />
-                                    </Grid>
-                                ))}
-
-                                <Grid item xs={6}>
-                                    <IconButton onClick={addAnswer}>
-                                        <AddBoxSharpIcon color='info'/>
-                                    </IconButton>
-                                </Grid>
-                            </Grid>
-                        </CardContent>
-                    </DialogContent>
-                    <DialogActions sx={{justifyContent: 'center'}}>
-                        <Stack direction="row" spacing={2}>
-                            <Button onClick={cancel} variant="contained" color="error">Cancel</Button>
-                            <Button onClick={save} variant="contained" color="success">Save</Button>
-                        </Stack>
-                    </DialogActions>
-                </Card>
-            </Dialog>
-
-            <ConfirmDialog confirmText={'Delete'} cancelText={'Cancel'} title={'Delete question?'}
-                           content={'Do you want to delete question? '} {...dialogProps}  />
-
-        </>
-
-
-    )
-}
+      <ConfirmDialog
+        confirmText={'Delete'}
+        cancelText={'Cancel'}
+        title={'Delete question?'}
+        content={'Do you want to delete question? '}
+        {...dialogProps}
+      />
+    </>
+  );
+};
